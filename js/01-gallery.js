@@ -2,54 +2,41 @@ import { galleryItems } from "./gallery-items.js";
 // Change code below this line
 
 const galleryList = document.querySelector(".gallery");
-const galleryItemsMarkup = createGalleryItems(galleryItems);
-galleryList.insertAdjacentHTML("beforeend", galleryItemsMarkup);
-const bannerImgEl = document.querySelector(".gallery__image");
 
-// const createGalleryItems = ({ preview, original, description } = {}) => {
-//   return `<li class="gallery__item">
-//   <a class="gallery__link" href="${original}">
-//   <img class="gallery__image" src="${preview}" data-source="${original}" alt="${description}"/> </a></li>`;
-// };
-
-// markup
-
-function createGalleryItems(items) {
-  return items
-    .map(({ preview, original, description }) => {
-      return `<li class="gallery__item">
+const galleryItemsMarkup = galleryItems
+  .map(
+    ({ preview, original, description }) => `<li class="gallery__item">
   <a class="gallery__link" href="${original}">
-    <img
-      class="gallery__image"
-      src="${preview}"
-      data-source="${original}"
-      alt="${description}"
-    />
-  </a>
-</li>`;
-    })
-    .join("");
-}
+  <img class="gallery__image" src="${preview}" data-source="${original}" alt="${description}"/> </a></li>`
+  )
+  .join("");
 
-// modal
 const instance = basicLightbox.create(
-  `<img width="1280" height="auto" src="">`,
-
-  instance.show(() => window.addEventListener("keydown", onEscKeyPress)),
-  instance.close(() => window.removeEventListener("keydown", onEscKeyPress))
+  `<img width="auto" height="auto" src="">`,
+  {
+    onShow: (instance) => {
+      window.addEventListener("keydown", onEscKeyPress);
+    },
+    onClose: (instance) => {
+      window.removeEventListener("keydown", onEscKeyPress);
+    },
+  }
 );
 
-function onEscKeyPress(e) {
-  if (e.code !== "Escape") return;
+function onEscKeyPress(event) {
+  if (event.code !== "Escape") return;
   instance.close();
 }
-const onImgClick = ({ target: galleryImgEl }) => {
-  if (galleryImgEl.tagName !== "IMG") {
+
+function onImgClick(event) {
+  event.preventDefault();
+  const imgDatasetSource = event.target.dataset.source;
+  if (!imgDatasetSource) {
     return;
   }
+  instance.element().querySelector("img").src = imgDatasetSource;
+  instance.show();
+}
 
-  const imgUrlPath = galleryImgEl.dataset.source;
-  bannerImgEl.src = imgUrlPath;
-};
-
+galleryList.insertAdjacentHTML("beforeend", galleryItemsMarkup);
 galleryList.addEventListener("click", onImgClick);
